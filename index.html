@@ -8,6 +8,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AMix-1</title>
 
+
+
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
   <script>
@@ -80,7 +82,7 @@
       <div class="columns is-centered">
         <div class="column has-text-centered">
           <h1 class="title is-1 publication-title">
-            AMix-1
+            AMix-1: A Pathway to Test-Time Scalable<br>Protein Foundation Model
           </h1> <!-- TODO: fix the title -->
           <!-- <div class="is-size-5 publication-authors">
             <span class="author-block">
@@ -105,8 +107,71 @@
           <div class="is-size-6 publication-authors">
             <span class="author-block">*Full author list in Contributions</span>
           </div>
+            <div class="publication-links">
+              <!-- PDF Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/pdf/2503.14476"
+                   class="external-link button is-normal is-rounded is-dark"> <!-- TODO: fix pdf link -->
+                  <span class="icon">
+                      <!-- <i class="fas fa-file-pdf"></i> -->
+                      <i class="fa-solid fa-file-pdf" style="color: #ff5c5c;"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span>
+              <!-- Arxiv Link. -->
+              <!-- <span class="link-block">
+                <a href=""
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span> -->
+              <!-- Code Link. -->
+              <!-- <span class="link-block"> -->
+                <!-- <a href="https://github.com/BytedTsinghua-SIA/DAPO" -->
+                   <!-- class="external-link button is-normal is-rounded is-dark"> TODO: fix repo link -->
+                  <!-- <span class="icon"> -->
+                      <!-- <i class="fab fa-github"></i> -->
+                  <!-- </span> -->
+                  <!-- <span>Code</span> -->
+                  <!-- </a> -->
+              <!-- </span> -->
+              <!-- Dataset Link. -->
+              <!-- <span class="link-block"> -->
+                <!-- <a href="https://huggingface.co/datasets/BytedTsinghua-SIA/DAPO-Math-17k" -->
+                   <!-- class="external-link button is-normal is-rounded is-dark"> TODO: fix dataset link -->
+                  <!-- <span class="icon"> -->
+                      <!-- <i class="fa-regular fa-database"></i> -->
+                  <!-- </span> -->
+                  <!-- <span>Data</span> -->
+                  <!-- </a> -->
+              <!-- </span> -->
+              <!-- Model Link. -->
+              <span class="link-block">
+                <a href="https://huggingface.co/GenSI"
+                   class="external-link button is-normal is-rounded is-dark"> <!-- TODO: fix model link -->
+                  <span class="icon">
+                    <!-- <i class="fa-solid fa-face-smiling-hands"></i> -->
+                    <i class="fa-solid fa-face-smiling-hands" style="color: #FFD43B;"></i>
+                  </span>
+                  <span>Model(Incoming)</span>
+                  </a>
+              </span>
+              <span class="link-block">
+                  <a href="#Citation" class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      📚
+                    </span>
+                    <span>Citation</span>
+                  </a>
+                </span>
+            </div>
         </div>
       </div>
+          
       <div class="columns is-centered has-text-centered">
         <div class="column is-full">
           <h2 class="subtitle has-text-centered">
@@ -134,7 +199,7 @@
         <div class="content has-text-justified">
           <p>
             We are the first to characterize scaling law and emergent ability for an advanced generative model, i.e. Bayesian Flow Network, and pretrain a family of powerful models, AMix-1, scaling from 8 million to 1.7 billion parameters.
-            Following figures illustrate scaling laws of cross-entropy and training FLOPs across various model sizes and the noise level \(\alpha\). We show the equation between \(\mathcal{L}\) and FLOPs \(F\), indicating that the AMix-1 models have <b>predictable scaling laws</b>.
+            Following figures illustrate scaling laws of cross-entropy and training FLOPs across various model sizes and the noise level \(\alpha\). We show the equation between \(\mathcal{L}\) and FLOPs \(F\), indicating that the AMix-1 models have predictive scaling laws.
           </p>
         </div>
         <div class="columns is-centered has-text-centered">
@@ -158,7 +223,8 @@
         <h2 class="title is-3">Emergent Ability</h2>
         <div class="content has-text-justified">
           <p>
-            Emergent abilities of AMix-1 models under varying noise levels \(\alpha\). Noise levels of \(\alpha=0.16\) and \(0.32\) exhibit clear emergence. Darker colors indicate models with more parameters. Lower cross-entropy, and consequently stronger downstream performance, emerges only as the model size increases.
+            Emergent abilities of AMix-1 models under varying noise levels \(\alpha\). Noise levels of \(\alpha=0.16\) and \(0.32\) exhibit clear emergence. Darker colors indicate models with more parameters. Lower cross-entropy, and consequently stronger downstream performance, emerges as the model size increases
+            .
           </p>
         </div>
         <div class="columns is-centered has-text-centered">
@@ -181,8 +247,8 @@
         <h2 class="title is-3">In-Context Learning</h2>
         <div class="content has-text-justified">
           <p>
-            We establish a unified protein design framework leveraging AMix-1's in-context learning ability and evolutionary signals in multiple sequence alignments for structure- and function-preserving generation.
-            Following figure illustrate the comparison of standard LLM in-context learning (top) with protein family conditioning via MSA profiles in AMix-1 (bottom). In LLM ICL, few-shot exemplars are token-level demonstrations; in AMix-1, the MSA profile serves as a dense, position-wise family prompt.
+            We establish a unified protein design framework leveraging AMix-1's <b>in-context learning</b> ability and evolutionary signals in multiple sequence alignments for <b> novel structure- and function-preserving generation</b>.
+            Following figure illustrate the comparison of standard LLM in-context learning (top) with protein family conditioning via MSA profiles in AMix-1 (bottom). In LLM ICL, few-shot exemplars are token-level demonstrations; in AMix-1, the MSA profile serves as a <b>dense, position-wise family prompt</b>.
           </p>
         </div>
         <div class="columns is-centered has-text-centered">
@@ -190,7 +256,17 @@
           <h2 class="subtitle has-text-centered">
             <img src="./static/images/ICL.png" style="max-width: 100%; height: auto; width: 100%;"/>
           </h2>
-        </div>
+        <div class="columns is-vcentered">
+            <div class="column is-half">
+              <p class="has-text-justified">
+                We design a high-activity AmeR variant with a \(50\times\) improvement over the wild type, showcasing AMix-1's real-world impact on functional protein engineering.
+                Specifically, we used AMix-1 to generate 40 candidate protein sequences, each containing no more than ten mutations. The functional activity of these variants was measured using a fluorescent reporter assay, where higher DNA-binding affinity leads to stronger repression of a fluorescent protein, quantified as "fold repression." A higher fold repression value indicates better function. AMix-1's performance was compared to three baselines: Wild-Type (WT), a single-mutant library, and EvoAI, a state-of-the-art directed evolution method. The illustration on the right shows the wet-lab verification process guided iteratively by AMix-1.
+              </p>
+            </div>
+            <div class="column is-half">
+              <img src="./static/images/wet_lab.png" style="max-width: 100%; height: auto; width: 100%;"/>
+            </div>
+          </div>
       </div>
     </div>
 
@@ -205,13 +281,16 @@
         <h2 class="title is-3">Test-Time Scaling</h2>
         <div class="content has-text-justified">
           <p>
-            We introduce a novel evolutionary test-time scaling algorithm that amplifies AMix-1's effectiveness in in silico directed evolution, delivering rapid gains as verification budgets grow.
+            With the in-context learning ability of AMix-1, we push this capacity even further: introducing a novel <b>evolutionary test-time scaling</b> algorithm that uses AMix-1 as the proposer and an external plug-and-play verifier to generate candidate sequences from evolutionary constraints, achieving directed protein evolution through arbitrary in-silico verifiers or experimental screening.
           </p>
         </div>
         <div class="columns is-centered has-text-centered">
         <div class="column is-full">
           <h2 class="subtitle has-text-centered">
             <img src="./static/images/TTS.png" style="max-width: 100%; height: auto; width: 100%;"/>
+          </h2>
+          <h2 class="subtitle has-text-centered">
+            <img src="./static/images/TTS_results.png" style="max-width: 100%; height: auto; width: 100%;"/>
           </h2>
         </div>
       </div>
@@ -220,7 +299,7 @@
   </div>
 </section>
 
-<section class="section">
+<section class="section" id="Citation">
   <div class="container is-max-desktop">
     <!-- Abstract -->
     <div class="columns is-centered has-text-centered">
@@ -236,13 +315,18 @@
             <a href="./static/pdf/AMix-1_paper.pdf" target="_blank">AMix-1: Technical Report</a>
           </h2>
           <pre style="text-align: left;"><code>
-@article{2025amix1,
-  title={AMix-1: Technical Report},
+@article{lv2025amix1,
+  title={AMix-1: A Pathway to Test-Time Scalable Protein Foundation Model},
   author={Changze Lv*, Jiang Zhou*, Siyu Long*, Lihao Wang, Jiangtao Feng, Dongyu Xue, Yu Pei, Hao Wang, Zherui Zhang, Yuchen Cai, Zhiqiang Gao, Ziyuan Ma, Jiakai Hu, Chaochen Gao, Jingjing Gong, Yuxuan Song, Shuyi Zhang, Xiaoqing Zheng, Deyi Xiong, Lei Bai, Ya-Qin Zhang, Wei-Ying Ma, Bowen Zhou, Hao Zhou},
   journal={arXiv preprint arXiv:2507.xxxx},
   year={2025}
-}</code></pre>
+}</code>  </pre>
+        </div>
       </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-full" style="display: none;">
+          <script type="text/javascript" id="clustrmaps" src="//clustrmaps.com/map_v2.js?d=bR5O65Pq9kfxkXsRX5bpXbHJlS_ts6MErHP2YIkPXDk&cl=ffffff&w=a"></script>
+        </div>
     </div>
 
   </div>
@@ -314,6 +398,5 @@
     </div>
   </div>
 </footer>
-
 </body>
 </html>
