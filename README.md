@@ -20,12 +20,12 @@ Download config.yaml and model checkpoint
 
 For a single sequence:
 ```angular2html
-python inference.py --input_seqs "AAASASA" --num_seq 1 --novelty
+python inference.py --input_seqs "AAASASA" --num_seq 1 --novelty 0.2
 ```
 
 For multiple sequence alignment (MSA):
 ```angular2html
-python inference.py --input_seqs "AAASASA" --num_seq 10 --novelty 
+python inference.py --input_seqs "AAASASA" --num_seq 10 --novelty 0.2
 ```
 
 ## Test-time Scaling
