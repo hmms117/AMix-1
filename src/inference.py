@@ -274,7 +274,7 @@ def load_and_generate(
     input_seq,
     num_seq=10,
     ckpt_path='./ckpt/AMix-1-1.7b.ckpt',
-    novelty=0.2
+    time=0.2
 ):
     root_path = Path(ckpt_path).parents[1]
     sys.path.append(str(root_path))
@@ -295,7 +295,7 @@ def load_and_generate(
     total_output = []
     with torch.no_grad():
         for batch in dataloader:
-            output = generation(model, batch, start_t= novelty, infer_step=ckpt_cfg.model.bfn.cfg.num_diffusion_timesteps)
+            output = generation(model, batch, start_t= time, infer_step=ckpt_cfg.model.bfn.cfg.num_diffusion_timesteps)
             total_output.append(output)
 
     return total_output
@@ -305,7 +305,7 @@ if __name__ == "__main__":
     parser.add_argument('--input_seq', type=str, required=True, help='Input MSA, e.g. "AAASA,SAASA,ASASA"')
     parser.add_argument('--output_dir', type=str, default="./output", help='Output directory for generated sequences')
     parser.add_argument('--num_seq', type=int, default=10, help='Number of sequences to generate')
-    parser.add_argument('--novelty', type=float, default=0.2, help='Novelty factor for generation (0.0 to 1.0), 0.0 means no novelty')
+    parser.add_argument('--time', type=float, default=0.2, help='Noise factor for generation (0.0 to 1.0), 1.0 means no noise')
     parser.add_argument('--ckpt_path', type=str, default='./ckpt/AMix-1-1.7b.ckpt', help='Checkpoint path for the model')
     args = parser.parse_args()
 
@@ -320,19 +320,19 @@ if __name__ == "__main__":
         level=logging.ERROR
     )
 
-    input_seq = args.input_seq.replace(" ", "").split(",")
+    input_seq = args.input_seq.strip().replace(" ", "").split(",")
     print(f"Input MSA: {input_seq}")
 
     seq_lens = [len(seq) for seq in input_seq]
     if len(set(seq_lens)) != 1:
         raise ValueError("Sequences must have the same length!")
-    if not (0.0 <= args.novelty <= 1.0):
-        raise ValueError("Novelty must be between 0.0 and 1.0!")
+    if not (0.0 <= args.time <= 1.0):
+        raise ValueError("Time must be between 0.0 and 1.0!")
 
     outputs = load_and_generate(
         input_seq=input_seq,
         num_seq=args.num_seq,
         ckpt_path=args.ckpt_path,
-        novelty=1.0 - args.novelty
+        time=args.time
     )
     print(f"Output: {outputs[0]}")
