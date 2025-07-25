@@ -9,7 +9,7 @@ from utils import parse_fasta, write_fasta, create_initial_json
 
 from random_mutation import mutation
 
-from evaluation.metrics import evaluator
+from evaluation.metrics import verifier
 from rollout import run_generation
 
 # Initialize logger
@@ -89,7 +89,7 @@ def run_batch_evaluation(json_file, round_idx, eval_tasks, exp_dir, esm_fold_gpu
     
     # Efficiently run multiple evaluation tasks
     logger.info(f"Running evaluation tasks: {', '.join(eval_tasks)}")
-    evaluator(tmp_fasta, eval_tasks, esm_fold_gpus, args)
+    verifier(tmp_fasta, eval_tasks, esm_fold_gpus, args)
     
     # Update JSON data from evaluation results
     evaluated_seqs = parse_fasta(tmp_fasta)
@@ -632,7 +632,7 @@ def evaluate_final_round_samples(final_round_idx, exp_dir, esm_fold_gpus=1, args
     # Run pLDDT evaluation
     eval_tasks = ["pLDDT"]
     logger.info(f"Running pLDDT evaluation for final round samples...")
-    evaluator(tmp_fasta, eval_tasks, esm_fold_gpus, args)
+    verifier(tmp_fasta, eval_tasks, esm_fold_gpus, args)
     
     # Update JSON data from evaluation results
     evaluated_seqs = parse_fasta(tmp_fasta)
