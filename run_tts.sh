@@ -223,7 +223,7 @@ main() {
     mkdir -p "$EXP_DIR"
     
     # Build command
-    CMD="python3 ./tts_EvoAMix-1.py \
+    CMD="python3 ./src/tts_EvoAMix-1.py \
         --exp-dir \"$EXP_DIR\" \
         --filter-window \"$FILTER_WINDOW\" \
         --init-data \"$INIT_DATA\" \
