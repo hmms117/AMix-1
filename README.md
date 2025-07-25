@@ -32,16 +32,55 @@ pip install -r requirements.txt
 
 ## Inference
 
-Download config.yaml and model checkpoint
+### Download
 
-For a single sequence:
-```angular2html
-python inference.py --input_seqs "AAASASA" --num_seq 1 --novelty 0.2
+Download config.yaml and model checkpoint through Huggingface:
+```bash
+# login through your HuggingFace key
+huggingface-cli login
+# run code in src
+cd src
+# download the whole AMix-1-1.7B directory
+huggingface-cli download GenSI/AMix-1-1.7B --local-dir ./AMix-1-1.7B --local-dir-use-symlinks False
+# adjust directory structure
+mv AMix-1-1.7B/.hydra AMix-1-1.7B/ckpt ./
+# back to AMix-1
+cd ..
 ```
 
-For multiple sequence alignment (MSA):
+Before inference, the directory structure should be:
+```
+AMix-1/
+├── imgs
+├── src
+│   ├── .hydra
+│   │   └── config.yaml
+│   ├── ckpt
+│   │   └── AMix-1-1.7b.ckpt
+│   ├── model.py
+│   ├── inference.py
+│   └── ...
+│
+├── README.md
+├── inference.sh
+└── ...
+```
+
+### Important Parameters
+Parameters for `inference.sh`
+
+| Parameter | Description | Example |
+|-----------|-------------|---------|
+| `--input_seq` | Input MSA, a single sequence or multiple sequences with equal length | `"ASAAA"` or `"AAASA,SAASA,ASASA"` |
+| `--output_dir` | Sequences generated per round | `"./output"` |
+| `--num_seq` | Number of sequences to generate | `10` |
+| `--time` | Noise factor for generation (0.0 to 1.0), 1.0 means no noise | `0.8` |
+| `--ckpt_path` | Checkpoint path for the model | `"./ckpt/AMix-1-1.7b.ckpt"` |
+
+### Run
+
 ```angular2html
-python inference.py --input_seqs "AAASASA" --num_seq 10 --novelty 0.2
+sh inference.sh --input_seq "AAASASA" --output_dir "./output" --num_seq 10 --time 0.8 --ckpt_path "./ckpt/AMix-1-1.7b.ckpt"
 ```
 
 ## Test-time Scaling: EvoAMix-1
