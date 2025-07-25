@@ -12,34 +12,20 @@ We introduce **AMix-1**, a powerful protein foundation model built on Bayesian F
 
 ## 🔧 Installation Guide
 
-We recommend using a Python virtual environment to ensure isolation and compatibility.
-
-### ✅ 1. Clone the repository
-
 ```bash
+# Clone the repository
 git clone https://github.com/GenSI-THUAIR/AMix-1.git
 cd AMix-1
-```
 
-### ✅ 2. Set up a Python 3.10 environment
-
-Using **conda** (recommended):
-
-```bash
+# Create and activate a Python 3.10 environment (recommended: conda)
 conda create -n amix python=3.10 -y
 conda activate amix
-```
 
-Or using **venv**:
+# Alternatively, using venv
+# python3.10 -m venv venv
+# source venv/bin/activate   # On Windows: venv\Scripts\activate
 
-```bash
-python3.10 -m venv venv
-source venv/bin/activate    # On Windows: venv\Scripts\activate
-```
-
-### ✅ 3. Install dependencies
-
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
