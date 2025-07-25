@@ -7,7 +7,7 @@
 We introduce **AMix-1**, a powerful protein foundation model built on Bayesian Flow Networks and empowered by a systematic training methodology, encompassing **pretraining scaling laws**, **emergent capability analysis**, **in-context learning mechanism**, and **test-time scaling algorithm**.
 
 <div style="display: flex; justify-content: center; flex-wrap: wrap;">
-    <img src="./imgs/intro.png" style="width: 85%" />
+    <img src="./imgs/intro.png" style="width: 95%" />
 </div>
 
 ## 🔧 Installation Guide
