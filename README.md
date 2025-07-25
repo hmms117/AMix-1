@@ -10,12 +10,6 @@ We introduce **AMix-1**, a powerful protein foundation model built on Bayesian F
     <img src="./imgs/intro.png" style="width: 85%" />
 </div>
 
-## Installation
-
-Great! Based on your project hosted at [https://github.com/GenSI-THUAIR/AMix-1](https://github.com/GenSI-THUAIR/AMix-1), and the fact that you're using `Python 3.10` with a `requirements.txt`, here's a clean, production-ready installation guide section for your `README.md`:
-
----
-
 ## 🔧 Installation Guide
 
 We recommend using a Python virtual environment to ensure isolation and compatibility.
