@@ -1,4 +1,5 @@
 #!/bin/bash
+cd ./src
 
 # ===== Default =====
 output_dir="./output"
@@ -23,9 +24,6 @@ echo "Output Directory: $output_dir"
 echo "Number of Seq   : $num_seq"
 echo "Noise Factor    : $time"
 echo "Checkpoint Path : $ckpt_path"
-
-
-cd ./src
 
 python inference.py \
     --input_seq "$input_seq" \
