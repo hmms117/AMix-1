@@ -80,7 +80,7 @@ Parameters for `inference.sh`
 ### Run
 
 ```angular2html
-sh inference.sh --input_seq "AAASASA" --output_dir "./output" --num_seq 10 --time 0.8 --ckpt_path "./ckpt/AMix-1-1.7b.ckpt"
+./inference.sh --input_seq "AAASASA" --output_dir "./output" --num_seq 10 --time 0.8 --ckpt_path "./ckpt/AMix-1-1.7b.ckpt"
 ```
 
 ## Test-time Scaling: EvoAMix-1
