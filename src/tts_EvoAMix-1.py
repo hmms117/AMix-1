@@ -14,27 +14,29 @@ from rollout import run_generation
 
 # Initialize logger
 def setup_logger(exp_dir):
-    log_file = os.path.join(exp_dir, 'tts.log')
+    tts_log_file = os.path.join(exp_dir, 'tts.log')
     error_log_file = os.path.join(exp_dir, 'error.log')
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
 
-    # Create main logger
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler()
-        ]
-    )
-    
-    # Get current logger
-    logger = logging.getLogger(__name__)
+    # Remove any existing handlers:
+    for h in list(root.handlers):
+        root.removeHandler(h)
 
-    # Add error.log handler to record WARNING level and above logs only
-    error_handler = logging.FileHandler(error_log_file)
-    error_handler.setLevel(logging.WARNING)
-    error_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-    logger.addHandler(error_handler)
+    # Now add tts handlers:
+    fh = logging.FileHandler(tts_log_file)
+    sh = logging.StreamHandler()
+    for h in (fh, sh):
+        h.setLevel(logging.INFO)
+        h.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+        root.addHandler(h)
+
+    # And the error handler:
+    eh = logging.FileHandler(error_log_file)
+    eh.setLevel(logging.WARNING)
+    eh.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    root.addHandler(eh)
+
 
     return logger
 
@@ -699,12 +701,12 @@ def main():
 
     args = parser.parse_args()
     
+    # Create experiment directory
+    os.makedirs(args.exp_dir, exist_ok=True)
+
     # Initialize logger
     global logger
     logger = setup_logger(args.exp_dir)
-    
-    # Create experiment directory
-    os.makedirs(args.exp_dir, exist_ok=True)
     
     # Parse Evaluation Task Weights
     # eval-task-weights are comma-separated metrics and weights, e.g., pLDDT:1,progen_nll:-1

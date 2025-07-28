@@ -98,7 +98,7 @@ EvoAMix-1 is our test-time scaling algorithm that iteratively evolves protein se
 We provide a convenient bash script `run_tts.sh` to launch the EvoAMix-1 pipeline with proper parameter configuration:
 
 ```bash
-./run_tts.sh --rounds 5 --num-seqs 10 --top-k 3 --eval-task-weights "pLDDT:1.0,pTM:0.5"
+./run_tts.sh --rounds 10 --num-seqs 50 --top-k 5 --eval-task-weights "pLDDT:1.0"
 ```
 
 #### Key Configuration Parameters
@@ -120,12 +120,12 @@ EXP_BASE_DIR="/path/to/your/experiments"
 
 | Parameter | Description | Example |
 |-----------|-------------|---------|
-| `--rounds` | Number of evolution iterations | `5` |
-| `--num-seqs` | Sequences generated per round | `10` |
-| `--top-k` | Top sequences selected for next round | `3` |
+| `--rounds` | Number of evolution iterations | `10` |
+| `--num-seqs` | Sequences generated per round | `50` |
+| `--top-k` | Top sequences selected for next round | `5` |
 | `--eval-task-weights` | Evaluation metrics and weights | `"pLDDT:1.0,rosetta_energy:-1.0"` |
 | `--eval-filter` | Filter criteria for sequences | `"pLDDT>80,progen_nll<10"` |
-| `--infer-step` | Inference steps for generation | `10` |
+| `--infer-step` | Inference steps for generation | `50` |
 | `--esm-fold-gpus` | Number of GPUs for ESM-Fold | `1` |
 
 #### Evaluation Task Weights Format
@@ -171,10 +171,9 @@ def evaluate_your_metric(eval_file, args=None):
         score = your_evaluation_function(sequence)
         
         # Store score in annotations
-        seq_record.description += f" your_metric={score:.4f}"
         if 'annotations' not in seq_record.__dict__:
             seq_record.annotations = {}
-        seq_record.annotations['your_metric'] = score
+        seq_record['annotations']['your_metric'] = score
         
         metric_scores[seq_id] = score
     
@@ -189,7 +188,7 @@ def evaluate_your_metric(eval_file, args=None):
 
 1. **Function signature**: Must accept `eval_file` and optional `args` parameters
 2. **Score annotation**: Store scores in FASTA description as `metric_name=value`
-3. **Sequence annotations**: Store scores in `seq_record.annotations[metric_name]`
+3. **Sequence annotations**: Store scores in `seq_record['annotations'][metric_name]`
 4. **File update**: Write updated sequences back to the original FASTA file
 5. **Registration**: Add your function to the `METRICS` dictionary:
 
@@ -211,7 +210,6 @@ We provide several built-in evaluation metrics:
 - **`novelty`**: Sequence novelty compared to original
 - **`diversity`**: Intra-sample sequence diversity
 - **`repeatness`**: Amino acid repeat analysis
-- **`CLEAN_EC`**: Enzyme function prediction
 - **`identical`**: Sequence identity to original
 
 ### ⚠️ Environment Management for Custom Verifiers
@@ -245,7 +243,7 @@ def evaluate_external_verifier(eval_file, args=None):
     
     # Call external script in specific environment
     cmd = [
-        "conda", "run", "-n", "verifier_env", 
+        "conda", "run", "-n", "verifier_env",     # Or your python path
         "python", "/path/to/external_verifier.py",
         "--input", eval_file,
         "--output", eval_file  # Update in-place

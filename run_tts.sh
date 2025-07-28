@@ -1,6 +1,6 @@
 #!/bin/bash
-
-###### TTS-MULTI-DEV LAUNCHER ######
+cd ./src
+###### TTS LAUNCHER ######
 
 # =============================================================================
 # USER CONFIGURATION - PLEASE MODIFY THESE PATHS AND SETTINGS
