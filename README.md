@@ -288,6 +288,10 @@ exp_dir/
 
 The evolution process tracks all metrics across rounds, enabling detailed analysis of sequence improvement over time.
 
+## Acknowledgement
+
+This repo is partially built upon (dplm)[https://github.com/bytedance/dplm], which is a family of diffusion protein language models. We greatly thank @zaixiang zheng and @xinyou wang for their initial contribution.
+
 ## Citation
 
 ```bibtex
