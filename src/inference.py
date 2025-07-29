@@ -24,7 +24,10 @@ import logging
 tokenizer = EsmTokenizer.from_pretrained('facebook/esm2_t30_150M_UR50D')
 
 class SortishSampler(Sampler):
-    """Returns indices such that inputs with similar lengths are close together."""
+    """
+    Returns indices such that inputs with similar lengths are close together.
+    Modified from DPLM (https://github.com/bytedance/dplm)
+    """
 
     def __init__(
         self, sequence_lengths: Iterable, bucket_size: int, num_replicas: int = 1, rank: int = 0
