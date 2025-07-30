@@ -4,8 +4,9 @@ cd ./src
 # ===== Default =====
 output_dir="./output"
 num_seq=10
-time=0.8
+time=0.2
 ckpt_path="./ckpt/AMix-1-1.7b.ckpt"
+seed=42
 
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -14,6 +15,7 @@ while [[ "$#" -gt 0 ]]; do
         --num_seq) num_seq="$2"; shift ;;
         --time) time="$2"; shift ;;
         --ckpt_path) ckpt_path="$2"; shift ;;
+        --seed) seed="$2"; shift ;;
         *) echo "Unknown parameter: $1"; exit 1 ;;
     esac
     shift
@@ -24,10 +26,12 @@ echo "Output Directory: $output_dir"
 echo "Number of Seq   : $num_seq"
 echo "Noise Factor    : $time"
 echo "Checkpoint Path : $ckpt_path"
+echo "Seed            : $seed"
 
 python inference.py \
     --input_seq "$input_seq" \
     --output_dir "$output_dir" \
     --num_seq "$num_seq" \
     --time "$time" \
-    --ckpt_path "$ckpt_path"
+    --ckpt_path "$ckpt_path" \
+    --seed "$seed"
