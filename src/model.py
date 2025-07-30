@@ -1,6 +1,9 @@
-
-# Copyright (c) 2024 Bytedance Ltd. and/or its affiliates
-# SPDX-License-Identifier: Apache-2.0
+'''
+Some code modified partially from ESM implementation in Huggingface and DPLM (https://github.com/bytedance/dplm).
+---------------------------
+Copyright (c) 2025 Institute for AI Industry Research (AIR), Tsinghua University, and AI For Science Group, Shanghai Artificial Intelligence Laboratory
+SPDX-License-Identifier: Apache-2.0
+'''
 
 import numpy as np
 import torch
@@ -202,7 +205,7 @@ def eager_attention_forward(
 
     return attn_output, attn_weights
 
-class ModifiedEsmSelfAttention(EsmSelfAttention):
+class FlashEsmSelfAttention(EsmSelfAttention):
     def __init__(self, config):
         self.num_key_value_groups = 1
         self.is_causal = False
@@ -297,45 +300,45 @@ class ModifiedEsmSelfAttention(EsmSelfAttention):
             outputs = outputs + (past_key_value,)
         return outputs
 
-class ModifiedEsmAttention(EsmAttention):
+class FlashEsmAttention(EsmAttention):
     def __init__(self, config):
         nn.Module.__init__(self)
-        self.self = ModifiedEsmSelfAttention(config)
+        self.self = FlashEsmSelfAttention(config)
         self.output = EsmSelfOutput(config)
         self.pruned_heads = set()
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
 
-class ModifiedEsmLayer(EsmLayer):
+class FlashEsmLayer(EsmLayer):
     def __init__(self, config):
         nn.Module.__init__(self)
         self.chunk_size_feed_forward = config.chunk_size_feed_forward
         self.seq_len_dim = 1
-        self.attention = ModifiedEsmAttention(config)
+        self.attention = FlashEsmAttention(config)
         self.is_decoder = config.is_decoder
         self.add_cross_attention = config.add_cross_attention
         if self.add_cross_attention:
             if not self.is_decoder:
                 raise RuntimeError(f"{self} should be used as a decoder model if cross attention is added")
-            self.crossattention = ModifiedEsmAttention(config)
+            self.crossattention = FlashEsmAttention(config)
         self.intermediate = EsmIntermediate(config)
         self.output = EsmOutput(config)
         self.LayerNorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         
-class ModifiedEsmEncoder(EsmEncoder):
+class FlashEsmEncoder(EsmEncoder):
     def __init__(self, config):
         nn.Module.__init__(self)
         self.config = config
-        self.layer = nn.ModuleList([ModifiedEsmLayer(config) for _ in range(config.num_hidden_layers)])
+        self.layer = nn.ModuleList([FlashEsmLayer(config) for _ in range(config.num_hidden_layers)])
         self.emb_layer_norm_after = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
         self.gradient_checkpointing = False
 
-class ModifiedEsmModel(EsmModel):
+class FlashEsmModel(EsmModel):
     def __init__(self, config, add_pooling_layer=True):
         EsmPreTrainedModel.__init__(self, config)
         self.config = config
 
         self.embeddings = EsmEmbeddings(config)
-        self.encoder = ModifiedEsmEncoder(config)
+        self.encoder = FlashEsmEncoder(config)
 
         self.pooler = EsmPooler(config) if add_pooling_layer else None
 
@@ -452,175 +455,6 @@ class ModifiedEsmModel(EsmModel):
             cross_attentions=encoder_outputs.cross_attentions,
         )
 
-class EsmForDPLM(EsmForMaskedLM):
-    def __init__(self, config, dropout=0.1, load_pretrained_ckpt = None):
-        
-        tokenizer = AutoTokenizer.from_pretrained(config.pretrained_model_name_or_path)
-
-        config = AutoConfig.from_pretrained(**config)
-        # net = AutoModelForMaskedLM.from_config(config)
-        # config.hidden_dropout_prob = dropout
-        
-        EsmPreTrainedModel.__init__(self, config)
-        self.esm = ModifiedEsmModel(config, add_pooling_layer=False)
-        self.lm_head = EsmLMHead(config)
-        
-        self.init_weights()
-        
-        self.mask_id = tokenizer.mask_token_id
-        self.pad_id = tokenizer.pad_token_id
-        self.bos_id = tokenizer.cls_token_id
-        self.eos_id = tokenizer.eos_token_id
-        self.x_id = tokenizer._token_to_id['X']
-        
-        self.contact_head = None
-        # self.esm.contact_head = None
-        # self.esm.embeddings.position_embeddings = None
-        self.tokenizer = tokenizer
-        self.load_pretrained_ckpt = load_pretrained_ckpt
-    
-    def forward(self,
-                input_ids,
-                attention_mask=None,
-                inputs_embeds=None,
-                decoder_input_ids=None,
-                decoder_attention_mask=None,
-                decoder_inputs_embeds=None,
-                labels=None,
-                output_attentions=None,
-                output_hidden_states=None,
-                return_dict=None,
-                encoder_hidden_states=None,
-                encoder_attention_mask=None,
-            ):
-        attention_mask = input_ids.ne(self.pad_id)
-        outputs = self.esm(
-            input_ids,
-            attention_mask=attention_mask,
-            encoder_hidden_states=encoder_hidden_states,
-            encoder_attention_mask=encoder_attention_mask,
-        )
-        sequence_output = outputs[0]
-        logits = self.lm_head(sequence_output)
-        
-        result = {
-            "logits": logits,
-            "last_hidden_state": sequence_output,
-        }
-        return result
-    
-    def forward_encoder(self, batch, **kwargs):
-        return {}
-    
-    def get_non_special_sym_mask(self, output_tokens, partial_masks=None):
-        non_special_sym_mask = (
-            output_tokens.ne(self.pad_id) &
-            output_tokens.ne(self.bos_id) &
-            output_tokens.ne(self.eos_id)
-        )
-        if partial_masks is not None:
-            non_special_sym_mask &= (~partial_masks)
-        return non_special_sym_mask
-    
-    def initialize_output_tokens(self, batch, encoder_out, partial_masks=None, **kwargs):
-        tokens = batch['input_ids']
-        if tokens is None:
-            raise NotImplementedError
-        else:
-            output_mask = self.get_non_special_sym_mask(tokens, partial_masks=partial_masks)
-
-            output_tokens = tokens.masked_fill(output_mask, self.mask_id)
-            output_scores = torch.zeros_like(output_tokens, dtype=torch.float)
-
-            return output_tokens, output_scores
-        
-    def forward_decoder(self, prev_decoder_out, encoder_out, need_attn_weights=False, partial_masks=None,
-                        sampling_strategy='argmax'):
-        output_tokens = prev_decoder_out['output_tokens'].clone()
-        output_scores = prev_decoder_out['output_scores'].clone()
-        step, max_step = prev_decoder_out['step'], prev_decoder_out['max_step']
-        temperature = prev_decoder_out['temperature']
-        history = prev_decoder_out['history']
-
-        output_masks = self.get_non_special_sym_mask(output_tokens, partial_masks=partial_masks)
-
-        esm_out = self.forward(
-            input_ids=output_tokens,
-        )
-        logits = esm_out['logits']
-
-        logits[..., self.mask_id] = -math.inf
-        logits[..., self.x_id] = -math.inf
-        
-        if sampling_strategy == 'argmax':
-            _scores, _tokens = logits.max(-1)
-        elif sampling_strategy == 'sample':
-            _tokens, _scores = sample_from_categorical(logits, temperature=temperature)
-        
-        output_tokens.masked_scatter_(output_masks, _tokens[output_masks])
-        output_scores.masked_scatter_(output_masks, _scores[output_masks])
-
-        history.append(output_tokens.clone())
-
-        return dict(
-            output_tokens=output_tokens,
-            output_scores=output_scores,
-            step=step + 1,
-            max_step=max_step,
-            history=history,
-        )
-        
-    def generate(self, batch, tokenizer=None, 
-                 max_iter=None, temperature=None, 
-                 partial_masks=None,
-                 sampling_strategy='gumbel_argmax'):
-        tokenizer = tokenizer 
-        max_iter = max_iter
-        temperature = temperature
-
-        # 0) encoding
-        encoder_out = self.forward_encoder(batch)
-        # 1) initialized from all mask tokens
-        initial_output_tokens, initial_output_scores = self.initialize_output_tokens(
-            batch, encoder_out=encoder_out, partial_masks=partial_masks)
-        prev_decoder_out = dict(
-            output_tokens=initial_output_tokens,
-            output_scores=initial_output_scores,
-            output_masks=None,
-            attentions=None,
-            step=0,
-            max_step=max_iter,
-            history=[initial_output_tokens.clone()],
-            temperature=temperature,
-        )
-
-        prev_decoder_out['output_masks'] = self.get_non_special_sym_mask(
-                prev_decoder_out['output_tokens'], partial_masks=partial_masks
-            )
-
-        for step in tqdm(range(max_iter), desc='Decoding'):
-            # predict
-            with torch.no_grad():
-                decoder_out = self.forward_decoder(
-                    prev_decoder_out=prev_decoder_out,
-                    encoder_out=encoder_out,
-                    partial_masks=partial_masks,
-                    sampling_strategy=sampling_strategy
-                )
-
-            output_tokens = decoder_out['output_tokens']
-            output_scores = decoder_out['output_scores']
-
-            prev_decoder_out.update(
-                output_tokens=output_tokens,
-                output_scores=output_scores,
-                step=step + 1,
-                history=decoder_out['history']
-            )
-
-        decoder_out = prev_decoder_out
-        return decoder_out['output_tokens'], decoder_out['output_scores']
-
 class EsmForBFN(EsmForMaskedLM):
     def __init__(self, config, load_pretrained_ckpt = None):
         
@@ -631,7 +465,7 @@ class EsmForBFN(EsmForMaskedLM):
         # config.hidden_dropout_prob = dropout
         
         EsmPreTrainedModel.__init__(self, config)
-        self.esm = ModifiedEsmModel(config, add_pooling_layer=False)
+        self.esm = FlashEsmModel(config, add_pooling_layer=False)
         self.lm_head = EsmLMHead(config)
         
         self.init_weights()
@@ -702,83 +536,3 @@ class EsmForBFN(EsmForMaskedLM):
         if partial_masks is not None:
             non_special_sym_mask &= (~partial_masks)
         return non_special_sym_mask
-    
-class TimestepEmbedder(nn.Module):
-    """
-    Embeds scalar timesteps into vector representations.
-    """
-    def __init__(self, hidden_size, frequency_embedding_size=256):
-        super().__init__()
-        self.mlp = nn.Sequential(
-            nn.Linear(frequency_embedding_size, hidden_size, bias=True),
-            nn.SiLU(),
-            nn.Linear(hidden_size, hidden_size, bias=True),
-        )
-        self.frequency_embedding_size = frequency_embedding_size
-
-    @staticmethod
-    def timestep_embedding(t, dim, max_period=10000):
-        """
-        Create sinusoidal timestep embeddings.
-        :param t: a 1-D Tensor of N indices, one per batch element.
-                          These may be fractional. 
-        :param dim: the dimension of the output.
-        :param max_period: controls the minimum frequency of the embeddings.
-        :return: an (N, D) Tensor of positional embeddings.
-        """
-        # https://github.com/openai/glide-text2im/blob/main/glide_text2im/nn.py
-        half = dim // 2
-        freqs = torch.exp(
-            -math.log(max_period) * torch.arange(start=0, end=half, dtype=torch.float32) / half
-        ).to(device=t.device)
-        args = t[..., None].float() * freqs[None]
-        embedding = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
-        if dim % 2:
-            embedding = torch.cat([embedding, torch.zeros_like(embedding[..., :1])], dim=-1)
-        return embedding.to(t.dtype)
-
-    def forward(self, t):
-        t_freq = self.timestep_embedding(t, self.frequency_embedding_size)
-        t_emb = self.mlp(t_freq)
-        return t_emb
-
-def sample_from_categorical(logits=None, temperature=1.0):
-    if temperature:
-        dist = torch.distributions.Categorical(logits=logits.div(temperature))
-        tokens = dist.sample()
-        scores = dist.log_prob(tokens)
-    else:
-        scores, tokens = logits.log_softmax(dim=-1).max(dim=-1)
-    return tokens, scores
-
-def init_bert_params(module):
-    """
-    Initialize the weights specific to the BERT Model.
-    This overrides the default initializations depending on the specified arguments.
-        1. If normal_init_linear_weights is set then weights of linear
-           layer will be initialized using the normal distribution and
-           bais will be set to the specified value.
-        2. If normal_init_embed_weights is set then weights of embedding
-           layer will be initialized using the normal distribution.
-        3. If normal_init_proj_weights is set then weights of
-           in_project_weight for MultiHeadAttention initialized using
-           the normal distribution (to be validated).
-    """
-
-    def normal_(data):
-        # with FSDP, module params will be on CUDA, so we cast them back to CPU
-        # so that the RNG is consistent with and without FSDP
-        data.copy_(data.cpu().normal_(mean=0.0, std=0.02).to(data.device))
-
-    if isinstance(module, nn.Linear):
-        normal_(module.weight.data)
-        if module.bias is not None:
-            module.bias.data.zero_()
-    if isinstance(module, nn.Embedding):
-        normal_(module.weight.data)
-        if module.padding_idx is not None:
-            module.weight.data[module.padding_idx].zero_()
-    if isinstance(module, EsmSelfAttention):
-        normal_(module.query.weight.data)
-        normal_(module.key.weight.data)
-        normal_(module.value.weight.data)
