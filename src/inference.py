@@ -1,5 +1,9 @@
-# Copyright (c) 2024 Bytedance Ltd. and/or its affiliates
-# SPDX-License-Identifier: Apache-2.0
+'''
+Some code modified partially from ESM implementation in Huggingface and DPLM (https://github.com/bytedance/dplm).
+---------------------------
+Copyright (c) 2025 Institute for AI Industry Research (AIR), Tsinghua University, and AI For Science Group, Shanghai Artificial Intelligence Laboratory
+SPDX-License-Identifier: Apache-2.0
+'''
 
 from pathlib import Path
 import hydra
@@ -70,6 +74,8 @@ class SortishSampler(Sampler):
 
 class ApproxBatchSampler(BatchSampler):
     """
+    Modified from DPLM (https://github.com/bytedance/dplm)
+    
     Parameters:
     -----------
     sampler : Pytorch Sampler
