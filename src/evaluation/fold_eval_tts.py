@@ -1,8 +1,8 @@
-# Copyright (c) Meta Platforms, Inc. and affiliates.
-
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
-
+# ---------------------------------------------------------------------
+# Copyright (c) 2025 Institute for AI Industry Research (AIR), Tsinghua University, and AI For Science Group, Shanghai Artificial Intelligence Laboratory
+# SPDX-License-Identifier: Apache-2.0
 
 from pathlib import Path
 import sys,os
