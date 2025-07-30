@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Institute for AI Industry Research (AIR), Tsinghua University, and AI For Science Group, Shanghai Artificial Intelligence Laboratory
+# SPDX-License-Identifier: Apache-2.0
 import os
 import subprocess
 import argparse
