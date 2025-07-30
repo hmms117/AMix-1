@@ -1,5 +1,3 @@
-# This source code is licensed under the MIT license found in the
-# LICENSE file in the root directory of this source tree.
 # Some code modified partially from ESM (https://github.com/facebookresearch/esm)
 # ---------------------------------------------------------------------
 # Copyright (c) 2025 Institute for AI Industry Research (AIR), Tsinghua University, and AI For Science Group, Shanghai Artificial Intelligence Laboratory
