@@ -76,11 +76,12 @@ Parameters for `inference.sh`
 | `--num_seq` | Number of sequences to generate | `10` |
 | `--time` | Noise factor for generation (0.0 to 1.0), 1.0 means no noise | `0.8` |
 | `--ckpt_path` | Checkpoint path for the model | `"./ckpt/AMix-1-1.7b.ckpt"` |
+| `--seed` |Random seed for reproducibility|42|
 
 ### Run
 
 ```angular2html
-./inference.sh --input_seq "AAASASA" --output_dir "./output" --num_seq 10 --time 0.8 --ckpt_path "./ckpt/AMix-1-1.7b.ckpt"
+./inference.sh --input_seq "AAASASA" --output_dir "./output" --num_seq 10 --time 0.8 --ckpt_path "./ckpt/AMix-1-1.7b.ckpt" --seed 42
 ```
 
 ## Test-time Scaling: EvoAMix-1
