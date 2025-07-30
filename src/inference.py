@@ -24,8 +24,19 @@ import numpy as np
 from typing import Iterable
 import math
 import logging
+import random
 
 tokenizer = EsmTokenizer.from_pretrained('facebook/esm2_t30_150M_UR50D')
+
+def set_seed(seed):
+    """
+    Set the random seed for reproducibility.
+    """
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 class SortishSampler(Sampler):
     """
@@ -170,7 +181,7 @@ class ApproxBatchSampler(BatchSampler):
         for batch in self.batches:
             yield batch
 
-def discreteBayesianFlow(t, x, beta1, beta_time_order=2, mask = None):
+def discreteBayesianFlow(t, x, beta1, beta_time_order=2, mask = None, seed=None):
     """
     Args:
         t: [B, N]
@@ -179,7 +190,9 @@ def discreteBayesianFlow(t, x, beta1, beta_time_order=2, mask = None):
     """
     # last_index = mask.sum(dim=-1).long() -1
     # if mask is not None:
-        
+    if seed is not None:
+        set_seed(seed)
+    
     K = x.size(-1)
     beta = beta1 * (t**beta_time_order)  # (B, N)
     beta = beta.unsqueeze(-1)  # (B, N, 1)
@@ -250,7 +263,9 @@ def get_dataloader(input_seq, num_seq = 10):
     )
     return dl
 
-def generation(model, batch, start_t = 0.2, infer_step = 100):
+def generation(model, batch, start_t = 0.2, infer_step = 100, seed=None):
+    if seed is not None:
+        set_seed(seed)
     inputs_embeds = batch['inputs_embeds'].to(model.device).to(model.dtype)
     attention_mask = batch['attention_mask'].to(model.device)
     mask = attention_mask.clone()
@@ -262,7 +277,7 @@ def generation(model, batch, start_t = 0.2, infer_step = 100):
     for idx, _t in enumerate(tqdm(np.linspace(start = start_t, stop=1.0, num=infer_step + 1)[:-1])):
         t = (torch.ones_like(attention_mask) * _t).to(inputs_embeds)
         # if idx > 0:
-        inputs_embeds = discreteBayesianFlow(t, probs, beta1=model.bfn.cfg.beta1, beta_time_order=model.bfn.cfg.beta_time_order, mask = mask)
+        inputs_embeds = discreteBayesianFlow(t, probs, beta1=model.bfn.cfg.beta1, beta_time_order=model.bfn.cfg.beta_time_order, mask = mask, seed=seed)
         pred_logits = model.bfn.forward(t, inputs_embeds, attention_mask)
         probs = torch.nn.functional.softmax(pred_logits, dim=-1) * mask[..., None] + inputs_embeds * (1 - mask[..., None])
     
@@ -286,8 +301,11 @@ def load_and_generate(
     input_seq,
     num_seq=10,
     ckpt_path='./ckpt/AMix-1-1.7b.ckpt',
-    time=0.2
+    time=0.2,
+    seed=None
 ):
+    if seed is not None:
+        set_seed(seed)
     root_path = Path(ckpt_path).parents[1]
     sys.path.append(str(root_path))
     cfg_path = Path(root_path, ".hydra", "config.yaml")
@@ -307,7 +325,7 @@ def load_and_generate(
     total_output = []
     with torch.no_grad():
         for batch in dataloader:
-            output = generation(model, batch, start_t= time, infer_step=ckpt_cfg.model.bfn.cfg.num_diffusion_timesteps)
+            output = generation(model, batch, start_t= time, infer_step=ckpt_cfg.model.bfn.cfg.num_diffusion_timesteps,seed=seed)
             total_output.append(output)
 
     return total_output
@@ -319,6 +337,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_seq', type=int, default=10, help='Number of sequences to generate')
     parser.add_argument('--time', type=float, default=0.2, help='Noise factor for generation (0.0 to 1.0), 1.0 means no noise')
     parser.add_argument('--ckpt_path', type=str, default='./ckpt/AMix-1-1.7b.ckpt', help='Checkpoint path for the model')
+    parser.add_argument('--seed', type=int, default=42, help='Random seed for reproducibility')
     args = parser.parse_args()
 
     output_path = Path(args.output_dir)
@@ -332,7 +351,7 @@ if __name__ == "__main__":
         level=logging.ERROR
     )
 
-    input_seq = args.input_seq.strip().replace(" ", "").split(",")
+    input_seq = args.input_seq.replace(" ", "").split(",")
     print(f"Input MSA: {input_seq}")
 
     seq_lens = [len(seq) for seq in input_seq]
@@ -345,6 +364,7 @@ if __name__ == "__main__":
         input_seq=input_seq,
         num_seq=args.num_seq,
         ckpt_path=args.ckpt_path,
-        time=args.time
+        time=args.time,
+        seed=args.seed
     )
     print(f"Output: {outputs[0]}")
