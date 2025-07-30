@@ -291,7 +291,14 @@ The evolution process tracks all metrics across rounds, enabling detailed analys
 
 ## Acknowledgement
 
-This repo is partially built upon (dplm)[https://github.com/bytedance/dplm], which is a family of diffusion protein language models. We greatly thank @zaixiang zheng and @xinyou wang for their initial contribution.
+AMix-1 would like to express heartfelt thanks to the following projects and contributors.
+
+This work builds upon and adapts ideas and code from:
+- [microsoft/evodiff](https://github.com/microsoft/evodiff), which provided the preprocessed UniRef50 dataset, tools for sequence sampling evaluation, and the data processing pipeline.
+- [bytedance/dplm](https://github.com/bytedance/dplm), whose two samplers were utilized in inference.py.
+- [facebookresearch/esm](https://github.com/facebookresearch/esm), which inspired the design of the model architecture.
+
+We deeply appreciate the efforts of the creators of these repositories, whose work has been instrumental in shaping AMix-1.
 
 ## Citation
 
